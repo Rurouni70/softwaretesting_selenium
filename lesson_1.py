@@ -11,4 +11,3 @@ def driver(request):
 
 def test_for_lesson(driver):
     driver.get("https://software-testing.ru/")
-
