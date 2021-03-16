@@ -1,9 +1,12 @@
 import pytest
 from selenium import webdriver
 import random
+
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import time
-
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 link = 'http://localhost/litecart/en/create_account'
 
@@ -21,7 +24,9 @@ password = random_number
 
 @pytest.fixture
 def driver(request):
-    wd = webdriver.Chrome()
+    # wd = webdriver.Chrome()
+    wd = webdriver.Firefox()
+    # wd = webdriver.Ie(capabilities={"requireWindowFocus": True})
     request.addfinalizer(wd.quit)
     return wd
 
@@ -29,8 +34,14 @@ def driver(request):
 def test_for_lesson(driver):
     driver.get(link)
     driver.implicitly_wait(10)
+    select_ex = driver.find_element_by_xpath("//select[@name = 'country_code']")
+    driver.execute_script("arguments[0].style.opacity=1", select_ex)
     select = Select(driver.find_element_by_xpath("//select[@name = 'country_code']"))
+
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
+        (By.XPATH, "//select[@name = 'country_code']")))
     select.select_by_visible_text('United States')
+
 
     driver.find_element_by_xpath("//input[@name='firstname']").send_keys(first_name)
     driver.find_element_by_xpath("//input[@name='lastname']").send_keys(last_name)
@@ -43,8 +54,8 @@ def test_for_lesson(driver):
     driver.find_element_by_xpath("//input[@name='confirmed_password']").send_keys(password)
     driver.find_element_by_xpath("//button[@name='create_account']").click()
 
+    time.sleep(2)
     driver.find_element_by_xpath("//a[text()='Logout']").click()
-
     driver.find_element_by_xpath("//input[@name='email']").send_keys(email)
     driver.find_element_by_xpath("//input[@name='password']").send_keys(password)
     driver.find_element_by_xpath("//button[@name='login']").click()
