@@ -34,14 +34,11 @@ def driver(request):
 def test_for_lesson(driver):
     driver.get(link)
     driver.implicitly_wait(10)
-    select_ex = driver.find_element_by_xpath("//select[@name = 'country_code']")
-    driver.execute_script("arguments[0].style.opacity=1", select_ex)
-    select = Select(driver.find_element_by_xpath("//select[@name = 'country_code']"))
-
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
-        (By.XPATH, "//select[@name = 'country_code']")))
-    select.select_by_visible_text('United States')
-
+    arrow = driver.find_element_by_xpath("//span[@class='select2-selection__arrow']")
+    arrow.click()
+    search_field = driver.find_element_by_xpath("//input[@class='select2-search__field']")
+    search_field.send_keys('United States')
+    search_field.send_keys(u'\ue007')
 
     driver.find_element_by_xpath("//input[@name='firstname']").send_keys(first_name)
     driver.find_element_by_xpath("//input[@name='lastname']").send_keys(last_name)
