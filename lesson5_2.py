@@ -24,12 +24,12 @@ def test_1_a(driver):
     sale_price_in_main_page = driver.find_element_by_css_selector('#box-campaigns strong')
 
     regular_price_color_main_page = regular_price_in_main_page.value_of_css_property('color')
-    regular_through_price = regular_price_in_main_page.value_of_css_property('text-decoration')  # return "line-through solid rgb(119, 119, 119)"
+    regular_through_price = regular_price_in_main_page.tag_name # return s
     regular_size_font_main = float(regular_price_in_main_page.value_of_css_property('font-size').replace('px', ''))
 
     sale_price_color_in_mane_page = sale_price_in_main_page.value_of_css_property('color')
     sale_price_m = sale_price_in_main_page.text
-    sale_price_bold_in_main_page = sale_price_in_main_page.value_of_css_property('font-weight')  # return "700"
+    sale_price_bold_in_main_page = sale_price_in_main_page.tag_name # return strong
     sale_price_font_size_main_page = float(sale_price_in_main_page.value_of_css_property('font-size').replace('px', ''))
 
     duck.click()
@@ -40,9 +40,9 @@ def test_1_a(driver):
     sale_price_in_product_page = driver.find_element_by_css_selector('strong.campaign-price')
     sale_price_p = sale_price_in_product_page.text
     regular_price_color_product_page = regular_price_in_product_page.value_of_css_property('color')
-    regular_through_price_product = regular_price_in_product_page.value_of_css_property('text-decoration')  # return "line-through solid rgb(119, 119, 119)
+    regular_through_price_product = regular_price_in_product_page.tag_name # return s
 
-    sale_price_bold_in_product_page = sale_price_in_product_page.value_of_css_property('font-weight')  # return "700"
+    sale_price_bold_in_product_page = sale_price_in_product_page.tag_name # return strong
     sale_price_color_in_product_page = sale_price_in_product_page.value_of_css_property('color')
 
     sale_price_font_size_product_page = float(sale_price_in_product_page.value_of_css_property('font-size').replace('px', ''))
@@ -89,12 +89,13 @@ def test_1_a(driver):
     assert is_gray(get_rgb_color(regular_price_color_product_page))
 
     # обычная цена зачёркнутая на главной странице
-
+    assert regular_through_price == "s"
     # обычная цена зачёркнутая на странице товара
-
+    assert regular_through_price_product == 's'
     # акционная цена жирная на главной странице
+    assert sale_price_bold_in_main_page == 'strong'
     # акционная цена жирная на странице товара
-
+    assert sale_price_bold_in_product_page == 'strong'
     # акционная цена красная на главной странице
     assert is_red(get_rgb_color(sale_price_color_in_mane_page))
     # акционная цена красная на странице товара
