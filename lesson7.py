@@ -5,29 +5,68 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.select import Select
 
 link = 'http://localhost/litecart/en/'
 
 
 @pytest.fixture
-def driver(request):
+def set_driver(request):
     wd = webdriver.Chrome()
+    wd.implicitly_wait(0.5)
     request.addfinalizer(wd.quit)
     return wd
 
 
-def test_for_lesson(driver):
+def test_for_lesson(set_driver):
+    driver = set_driver
     driver.get(link)
-    first_product = driver.find_element_by_css_selector("li.product.column.shadow.hover-light")
-    first_product.click()
-    # time.sleep(2) Почему тест перестаёт падать, когда появляется тут задержка?
+    add_to_cart(driver, 3)
+    cart = driver.find_element_by_xpath('//a[text()="Checkout »"]')
+    cart.click()
 
-    add_to_cart = WebDriverWait(driver, 30).until(
-        EC.visibility_of_element_located((By.XPATH, "//button[@name = 'add_cart_product']")))
-    add_to_cart.click()
+    count_products_in_cart = driver.find_elements_by_xpath(
+        '//td[@class="item"]')
 
-    WebDriverWait(driver, 5).until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, 'a.content'), '1'))
-    add_to_cart.click()
-    time.sleep(5)
+    i = 1
+    while i <= len(count_products_in_cart):
+        product_name = driver.find_element_by_xpath('//li//strong').text
+        table_product_name = driver.find_element_by_xpath(
+            '//td[text() = "%s"]' % product_name)
 
+        remove_button = driver.find_element_by_xpath(
+            '//button[@name="remove_cart_item"]')
+        remove_button.click()
+
+        WebDriverWait(driver, 10).until(EC.staleness_of(table_product_name))
+        i += 1
+
+
+def add_to_cart(driver, items):
+    i = 1
+    while i <= items:
+
+        products = driver.find_elements_by_xpath(
+            "//li[contains(@class,'product column')]")
+        products[0].click()
+
+        try:
+            select_size = Select(driver.find_element_by_xpath(
+                '//select[@name="options[Size]"]'))
+            select_size.select_by_value("Medium")
+        except NoSuchElementException:
+            pass
+
+        button_add_to_cart = driver.find_element_by_xpath(
+            '//button[@name="add_cart_product"]')
+        button_add_to_cart.click()
+
+        WebDriverWait(driver, 10).until(
+            lambda d, x=i: d.find_element_by_xpath(
+                '//span[@class="quantity" and text()=%s]' % x))
+
+        logotype_link = driver.find_element_by_xpath(
+            '//div[@id="logotype-wrapper"]/a')
+        logotype_link.click()
+        i += 1
